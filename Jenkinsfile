@@ -5,6 +5,7 @@ pipeline {
         stage ('Testing') {
             steps {
                 sh 'cat /etc/os-release'
+                sh 'ls /etc/os-release'
             }
         }
     }
