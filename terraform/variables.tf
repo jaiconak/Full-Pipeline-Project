@@ -21,6 +21,5 @@ variable "backendImageUri" {
 variable "frontendImageUri" {
     description = "Frontend URI"
     default = "039612867339.dkr.ecr.us-east-1.amazonaws.com/lightfeather-frontend:v3"
-    
-  
+
 }

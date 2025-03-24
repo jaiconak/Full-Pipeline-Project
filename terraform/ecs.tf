@@ -15,7 +15,7 @@ resource "aws_ecs_task_definition" "backend" {
     container_definitions = jsonencode([
         {
             name = "backend"
-            image = "039612867339.dkr.ecr.us-east-1.amazonaws.com/lightfeather-backend:v3"
+            image = var.backendImageUri
             essential = true
             portMappings = [
                 {
@@ -40,7 +40,7 @@ resource "aws_ecs_task_definition" "frontend" {
     container_definitions = jsonencode([
         {
             name = "frontend"
-            image = "039612867339.dkr.ecr.us-east-1.amazonaws.com/lightfeather-frontend:v3"
+            image = var.frontendImageUri
             essential = true
             portMappings = [
                 {
