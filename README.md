@@ -1,59 +1,128 @@
-# Overview
-This repository contains a React frontend, and an Express backend that the frontend connects to.
+1. Overview 
+This repository contains the solution for the Lightfeather DevOps Coding Challenge. It demonstrates a complete end-to-end CI/CD pipeline and infrastructure deployment using industry best practices. The solution includes:
 
-# Objective
-Deploy the frontend and backend to somewhere publicly accessible over the internet. The AWS Free Tier should be more than sufficient to run this project, but you may use any platform and tooling you'd like for your solution.
+- Backend: A Node.js (Express) API.
 
-Fork this repo as a base. You may change any code in this repository to suit the infrastructure you build in this code challenge.
+- Frontend: A React application.
 
-# Submission
-1. A github repo that has been forked from this repo with all your code.
-2. Modify this README file with instructions for:
-* Any tools needed to deploy your infrastructure
-* All the steps needed to repeat your deployment process
-* URLs to the your deployed frontend.
+- Containerization: Both applications are Dockerized.
 
-# Evaluation
-You will be evaluated on the ease to replicate your infrastructure. This is a combination of quality of the instructions, as well as any scripts to automate the overall setup process.
+- Infrastructure as Code: AWS resources (ECS, ECR, ALB, VPC, etc.) are provisioned using Terraform.
 
-# Setup your environment
-Install nodejs. Binaries and installers can be found on nodejs.org.
-https://nodejs.org/en/download/
+- CI/CD Pipeline: Jenkins automates code checkout, Docker builds, image pushes to AWS ECR, and deployment updates via Terraform.
 
-For macOS or Linux, Nodejs can usually be found in your preferred package manager.
-https://nodejs.org/en/download/package-manager/
+2. Prerequisites
+Before you begin, ensure you have the following installed and configured:
 
-Depending on the Linux distribution, the Node Package Manager `npm` may need to be installed separately.
+Node.js v16 – The applications were tested with Node.js 16.
 
-# Running the project
-The backend and the frontend will need to run on separate processes. The backend should be started first.
-```
+Docker – For building and running container images.
+
+AWS CLI – Configured with the necessary credentials and permissions.
+
+Terraform CLI – To provision and manage AWS infrastructure.
+
+Jenkins – Deployed on an EC2 instance and accessible publicly for CI/CD automation.
+
+3. Local Development & Testing
+3.1 Clone the Repository
+git clone https://github.com/Team-LightFeather/devops-code-challenge.git
+cd devops-code-challenge
+
+3.2 Running the Backend
 cd backend
 npm ci
 npm start
-```
-The backend should response to a GET request on `localhost:8080`.
+The backend runs on http://localhost:8080.
 
-With the backend started, the frontend can be started.
-```
+3.3 Running the Frontend
 cd frontend
 npm ci
 npm start
-```
-The frontend can be accessed at `localhost:3000`. If the frontend successfully connects to the backend, a message saying "SUCCESS" followed by a guid should be displayed on the screen.  If the connection failed, an error message will be displayed on the screen.
+The frontend runs on http://localhost:3000 and should successfully fetch data from the backend.
 
-# Configuration
-The frontend has a configuration file at `frontend/src/config.js` that defines the URL to call the backend. This URL is used on `frontend/src/App.js#12`, where the front end will make the GET call during the initial load of the page.
+4. Dockerization
+Each application includes a Dockerfile that builds an image using Node.js v16:
 
-The backend has a configuration file at `backend/config.js` that defines the host that the frontend will be calling from. This URL is used in the `Access-Control-Allow-Origin` CORS header, read in `backend/index.js#14`
+Backend Dockerfile
 
-# Optional Extras
-The core requirement for this challenge is to get the provided application up and running for consumption over the public internet. That being said, there are some opportunities in this code challenge to demonstrate your skill sets that are above and beyond the core requirement.
+Sets the working directory, installs dependencies via npm ci, copies the code, exposes port 8080, and runs npm start.
 
-A few examples of extras for this coding challenge:
-1. Dockerizing the application
-2. Scripts to set up the infrastructure
-3. Providing a pipeline for the application deployment
-4. Running the application in a serverless environment
+Frontend Dockerfile
 
-This is not an exhaustive list of extra features that could be added to this code challenge. At the end of the day, this section is for you to demonstrate any skills you want to show that’s not captured in the core requirement.
+Similar setup but exposes port 3000.
+
+4.1 Building Docker Images
+Build the images locally
+# Backend
+cd backend
+docker build -t lightfeather-backend .
+
+# Frontend
+cd frontend
+docker build -t lightfeather-frontend .
+
+4.2 Pushing Images to AWS ECR
+After building:
+
+Tag the images:
+docker tag lightfeather-backend:latest 039612867339.dkr.ecr.us-east-1.amazonaws.com/lightfeather-backend:v1
+docker tag lightfeather-frontend:latest 039612867339.dkr.ecr.us-east-1.amazonaws.com/lightfeather-frontend:v1
+
+Authenticate with AWS ECR:
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 039612867339.dkr.ecr.us-east-1.amazonaws.com
+
+Push the images:
+docker push 039612867339.dkr.ecr.us-east-1.amazonaws.com/lightfeather-backend:v1
+docker push 039612867339.dkr.ecr.us-east-1.amazonaws.com/lightfeather-frontend:v1
+
+5. Infrastructure Provisioning with Terraform -All AWS resources required for the application (ECS, ALB, VPC, etc.) are defined and managed via Terraform.
+5.1 Deployment Steps
+Initialize Terraform (ensuring the backend configuration is correct):
+terraform init -reconfigure -force-copy -input=false
+
+terraform plan -out=planfile \
+  -var 'backendImageUri=039612867339.dkr.ecr.us-east-1.amazonaws.com/lightfeather-backend:v1' \
+  -var 'frontendImageUri=039612867339.dkr.ecr.us-east-1.amazonaws.com/lightfeather-frontend:v1'
+  
+terraform apply -auto-approve planfile
+IMPORTANT: The Terraform configuration updates the ECS task definitions and services without altering existing critical resources (e.g., ALB DNS).
+
+6. CI/CD Pipeline with Jenkins
+Jenkins automates the entire deployment process:
+
+- Source Control: Checks out the code from the Git repository.
+
+- Docker Operations: Builds, tags, and pushes Docker images to AWS ECR.
+
+- Terraform Deployment: Executes Terraform commands to update AWS ECS services with new image URIs.
+
+- Pipeline Configuration: Refer to the included Jenkinsfile for detailed steps.
+
+7. Deployment on AWS ECS
+ECS Cluster: Both applications are deployed on AWS ECS using Fargate.
+
+Load Balancer: The frontend is exposed via an Application Load Balancer (ALB) to the public internet.
+
+State Management: The Terraform state is maintained in an S3 bucket and is kept in sync.
+
+7.1 Accessing the Deployed Applications
+Frontend URL:
+Access your deployed application at the ALB DNS, e.g.,
+http://lightfeather-alb-140455032.us-east-1.elb.amazonaws.com
+
+Jenkins URL:
+Jenkins is available at, e.g.,
+http://98.80.210.120:8080/
+
+8. Additional Information
+Repository Sharing:
+The GitHub repository is private and has been shared with codingchallenge-eval@lightfeather.io.
+
+Notes:
+
+The solution has been tested locally and deployed on AWS using Terraform and Jenkins.
+
+The infrastructure is designed to be scalable and reproducible.
+
+The S3 state file is maintained and up-to-date to ensure consistency.
