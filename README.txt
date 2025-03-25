@@ -119,12 +119,6 @@ http://98.80.210.120:8080/
 Repository Sharing:
 The GitHub repository is private and has been shared with codingchallenge-eval@lightfeather.io.
 
-Credentials:
-
-Jenkins Username: admin
-
-Jenkins Password: admin
-
 Notes:
 
 The solution has been tested locally and deployed on AWS using Terraform and Jenkins.
