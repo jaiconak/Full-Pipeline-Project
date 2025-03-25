@@ -27,7 +27,7 @@ pipeline {
             steps{
                 git branch: "${BRANCH_NAME}", credentialsId: "${GIT_CRED}", \
                 url: "${PROJECT_URL}"
-                sh 'echo "You checked out the repo"'
+                sh 'echo "You checked out the repo!"'
             }
         }
 
