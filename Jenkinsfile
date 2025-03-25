@@ -88,7 +88,7 @@ pipeline {
             steps {
                 sh """
                 cd terraform 
-                terraform init -reconfigure
+                terraform init -reconfigure -force-copy -input=false
 
                 terraform plan -out=planfile \
                 -var 'backendImageUri=${BACKEND_ECR_REPO}:${BUILD_NUMBER}' \
