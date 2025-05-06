@@ -1,5 +1,5 @@
 1. Overview 
-This repository contains the solution for the Lightfeather DevOps Coding Challenge. It demonstrates a complete end-to-end CI/CD pipeline and infrastructure deployment using industry best practices. The solution includes:
+This repository contains the solution for the sideProj DevOps Coding Challenge. It demonstrates a complete end-to-end CI/CD pipeline and infrastructure deployment using industry best practices. The solution includes:
 
 - Backend: A Node.js (Express) API.
 
@@ -26,7 +26,7 @@ Jenkins – Deployed on an EC2 instance and accessible publicly for CI/CD automa
 
 3. Local Development & Testing
 3.1 Clone the Repository
-git clone https://github.com/Team-LightFeather/devops-code-challenge.git
+git clone https://github.com/Team-sideProj/devops-code-challenge.git
 cd devops-code-challenge
 
 3.2 Running the Backend
@@ -56,25 +56,25 @@ Similar setup but exposes port 3000.
 Build the images locally
 # Backend
 cd backend
-docker build -t lightfeather-backend .
+docker build -t sideProj-backend .
 
 # Frontend
 cd frontend
-docker build -t lightfeather-frontend .
+docker build -t sideProj-frontend .
 
 4.2 Pushing Images to AWS ECR
 After building:
 
 Tag the images:
-docker tag lightfeather-backend:latest 039612867339.dkr.ecr.us-east-1.amazonaws.com/lightfeather-backend:v1
-docker tag lightfeather-frontend:latest 039612867339.dkr.ecr.us-east-1.amazonaws.com/lightfeather-frontend:v1
+docker tag sideProj-backend:latest 039612867339.dkr.ecr.us-east-1.amazonaws.com/sideProj-backend:v1
+docker tag sideProj-frontend:latest 039612867339.dkr.ecr.us-east-1.amazonaws.com/sideProj-frontend:v1
 
 Authenticate with AWS ECR:
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 039612867339.dkr.ecr.us-east-1.amazonaws.com
 
 Push the images:
-docker push 039612867339.dkr.ecr.us-east-1.amazonaws.com/lightfeather-backend:v1
-docker push 039612867339.dkr.ecr.us-east-1.amazonaws.com/lightfeather-frontend:v1
+docker push 039612867339.dkr.ecr.us-east-1.amazonaws.com/sideProj-backend:v1
+docker push 039612867339.dkr.ecr.us-east-1.amazonaws.com/sideProj-frontend:v1
 
 5. Infrastructure Provisioning with Terraform -All AWS resources required for the application (ECS, ALB, VPC, etc.) are defined and managed via Terraform.
 5.1 Deployment Steps
@@ -82,8 +82,8 @@ Initialize Terraform (ensuring the backend configuration is correct):
 terraform init -reconfigure -force-copy -input=false
 
 terraform plan -out=planfile \
-  -var 'backendImageUri=039612867339.dkr.ecr.us-east-1.amazonaws.com/lightfeather-backend:v1' \
-  -var 'frontendImageUri=039612867339.dkr.ecr.us-east-1.amazonaws.com/lightfeather-frontend:v1'
+  -var 'backendImageUri=039612867339.dkr.ecr.us-east-1.amazonaws.com/sideProj-backend:v1' \
+  -var 'frontendImageUri=039612867339.dkr.ecr.us-east-1.amazonaws.com/sideProj-frontend:v1'
   
 terraform apply -auto-approve planfile
 IMPORTANT: The Terraform configuration updates the ECS task definitions and services without altering existing critical resources (e.g., ALB DNS).
@@ -109,7 +109,7 @@ State Management: The Terraform state is maintained in an S3 bucket and is kept 
 7.1 Accessing the Deployed Applications
 Frontend URL:
 Access your deployed application at the ALB DNS, e.g.,
-http://lightfeather-alb-140455032.us-east-1.elb.amazonaws.com
+http://sideProj-alb-140455032.us-east-1.elb.amazonaws.com
 
 Jenkins URL:
 Jenkins is available at, e.g.,
@@ -117,7 +117,7 @@ http://98.80.210.120:8080/
 
 8. Additional Information
 Repository Sharing:
-The GitHub repository is private and has been shared with codingchallenge-eval@lightfeather.io.
+The GitHub repository is private and has been shared with codingchallenge-eval@sideProj.io.
 
 Notes:
 
